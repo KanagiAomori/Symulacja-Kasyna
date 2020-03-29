@@ -23,7 +23,7 @@ public:
     char getFigura() const { return figura; }
     int getWartosc() const { return wartosc; }
     bool getjestwBanku() const { return jestwBanku; }
-    void wypisz() const { std::cout << figura << " "<< kolor << " "; }
+    void wypisz() const { std::cout << figura << " " << kolor << " "; }
 };
 
 #endif
