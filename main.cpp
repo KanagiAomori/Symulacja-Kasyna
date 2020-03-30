@@ -11,3 +11,4 @@ int main(int argc, char** argv)
     //ZlotaWyspa.pokazTale();
     return 0;
 }
+

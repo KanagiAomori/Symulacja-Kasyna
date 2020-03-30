@@ -7,21 +7,22 @@
 #include <vector>
 
 #define ILOSCKART 52
-#define ILOSCGRACZY 3
+#define MAXGRACZY 3   // max graczy
 #define MAXBOTOW 3
+#define MAXWSZYSTKICHGRACZY MAXBOTOW + MAXGRACZY
 #define WYGRYWAJACEPKT 21
-
-//class Gracz;    // forward declaration - ważne
 
 
 class Kasyno
 {
     private:
         Karta talia[ILOSCKART];
-        Gracz gracze[ILOSCGRACZY];
-        Bot* boty;  // dodaj konstruktor 1 - 3 graczy komputerowych
+        Gracz* gracze;
+        int iloscGraczy = MAXGRACZY; 
+        int iloscBotow = MAXBOTOW;
+        int iloscWszystkichGraczy;
     public:
-        Kasyno(int _iloscGraczy = 1, int _iloscBotow = 1); // przygotuj talie 52 kart
+        Kasyno(); // przygotuj talie 52 kart
         ~Kasyno();
         void tasuj(); // zamienia parę kart 100 razy
         void pokazTale();
@@ -37,12 +38,13 @@ class Kasyno
         void zapisz_stan_gry_txt(); 
 
         // do napisania 2
+        void inicjalizacja_graczy();        
         void rozpocznij_nowa_gre(); // możliwość rozpoczęcia nowej gry przez kasyno
-
         // do napisania 3
         void dodaj_bota();
 };
 
 void swapCard(Karta& A, Karta& B);
+void wybor_ilosci_graczy(int& _ilosc);
 
 #endif

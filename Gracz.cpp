@@ -15,7 +15,7 @@ void Gracz::wezKarte(Karta* _karta){
         this->set_WartoscReki();    // ustaw wartosc renki
     }
     else { 
-        std::cout << "Gracz ma maxymalną przysługującą mu ilość kart: " << MAXKARTGRACZA << std::endl;
+        std::cout << "Gracz: " << nazwa <<" ma maxymalna przysługująca mu ilość kart: " << MAXKARTGRACZA << std::endl;
     }
 }
 // sprawdzone
