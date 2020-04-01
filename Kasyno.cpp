@@ -3,6 +3,7 @@
 #include <limits>
 #include <fstream>
 #include <stdlib.h>
+#include <ostream>
 
 // konstruktor kasyna tworzy talie kart oraz graczy
 Kasyno::Kasyno() {
@@ -16,16 +17,10 @@ Kasyno::Kasyno() {
             n++;
         }
     }
-
-    this->inicjalizacja_graczy();   // ustawienie ilosci graczy i ich nazw oraz ilosci graczy wirtualnych
-
-    for(i = 0; i < iloscWszystkichGraczy; i++)    // przypisanie graczom kasyna
-        gracze[i].set_mojeKasyno(this);
     std::cout << "konstruktor obiektu - Kasyno" << std::endl;
 }
 
 Kasyno::~Kasyno() {
-    delete[] gracze;
     std::cout << "destruktor obiektu - Kasyno" << std::endl;
 }
 
@@ -71,33 +66,37 @@ Karta* Kasyno::dajKarte() {  // tak żeby nie wydać 2 razy tej samej karty
 }
 // sprawdzone
 void Kasyno::graj() {
+    bool restart;
     static int nrRundy = 0;
     int ileRozdac = 2;                      // poczatkowe rozdanie
-    
+
+    do {
     nrRundy++;
-    //if(nrRundy = 1) // przy pierwszej rundzie zainicjalizuj graczy
-    //    this->inicjalizacja_graczy();
+
+    this->inicjalizacja_graczy();   // ustawienie ilosci graczy i ich nazw oraz ilosci graczy wirtualnych
+        
     this->rozdaj_karty_grajacym(ileRozdac); // rozdanie 2 kart graczą
     this->wyswietl_reke_grajacych();        // i wyświetlenie początkowego stanu gry
-
-
     
-    while (this->ile_graczy_pozostalo() != 0 ){
-
-       
+    while (this->ile_graczy_pozostalo() != 0 ){       
         this->decyzja_o_Passowaniu();           // decyzja o passowaniu
         if (this->ile_graczy_pozostalo()){      // pozostaliGracze != 0     
             this->rozdaj_karty_grajacym(1);     //rozdanie
             this->wyswietl_reke_grajacych();
         }
         else {
-             
             this ->okresl_zwyciezce();          // spawdz czy jest zwycięzca
         }
     }
     this->zapisz_stan_gry_txt();
+
+    this->zwalnianie_pamieci();
     std::cout << "Koniec Rundy " << "(" <<  nrRundy << ")" << std::endl;
+    restart = this->rozpocznij_nowa_gre();    // menu wyboru
+    } while (restart);
 }
+
+
 
 void Kasyno::decyzja_o_Passowaniu() {
     char decyzja;
@@ -105,10 +104,10 @@ void Kasyno::decyzja_o_Passowaniu() {
     int i;
 
     for (i = 0; i < iloscGraczy; i++){                              // powtórz dla każdego gracza
-        if (this->gracze[i].get_graDalej()){                            // jeżeli gracz gra dalej zapytacj czy chce kontynuować
+        if (this->gracze[i]->get_graDalej()){                            // jeżeli gracz gra dalej zapytacj czy chce kontynuować
             std::cout << std::endl << "Gracz udziela odpowiedzi Tak = [t] lub Nie = [n]" << std::endl;
-            if (this->gracze[i].get_wartoscReki() >= WYGRYWAJACEPKT){    // gracz który ma 21 pkt >= passuje
-                this->gracze[i].set_graDalej(false);
+            if (this->gracze[i]->get_wartoscReki() >= WYGRYWAJACEPKT){    // gracz który ma 21 pkt >= passuje
+                this->gracze[i]->set_graDalej(false);
                 powtorz = false;
             }
             while (powtorz){
@@ -122,11 +121,11 @@ void Kasyno::decyzja_o_Passowaniu() {
                 else switch (decyzja)
                 {
                     case 't':
-                        gracze[i].set_graDalej(true);
+                        gracze[i]->set_graDalej(true);
                         powtorz = false;
                         break;
                     case 'n':
-                        gracze[i].set_graDalej(false);
+                        gracze[i]->set_graDalej(false);
                         powtorz = false;
                         break;
                     default:
@@ -139,49 +138,47 @@ void Kasyno::decyzja_o_Passowaniu() {
         powtorz = true;
     }
     /*
-    Gracz* grPtr = nullptr;
+    Bot* grPtr = nullptr;
         grPtr = &gracze[i];
         grPtr->set_graDalej();  
     */
     for(i = iloscGraczy; i < iloscWszystkichGraczy; i++) {    // sprawdza czy boty przekroczyły limit
-    gracze[i].set_graDalej();
+        gracze[i]->set_graDalej(false);
     }
-    
 }
 
 void Kasyno::rozdaj_karty_grajacym(int _ile) {
     for (int i = 0; i < iloscWszystkichGraczy; i++)               // rozdanie kart graczą 
         for (int j = 0; j < _ile; j++)                  // po ile kart
-            if (gracze[i].get_graDalej())               // jeżeli gracz gra dalej daj mu kartę
-                gracze[i].wezKarte(this->dajKarte());   // asocjacja
+            if (gracze[i]->get_graDalej())               // jeżeli gracz gra dalej daj mu kartę
+                gracze[i]->wezKarte(this->dajKarte());   // asocjacja
 }
 
 void Kasyno::wyswietl_reke_grajacych() {
     for (int i = 0; i < iloscWszystkichGraczy; i++)   // wyswietla stan Ręki każdego gracza który nie spasował
-        if (gracze[i].get_graDalej()){      // sprawdza czy gracz jest jeszcze w grze
-            std::cout << "gracz [" << i + 1 << "]:" << std::endl;
-            gracze[i].wyswietlReke();
+        if (gracze[i]->get_graDalej()){      // sprawdza czy gracz jest jeszcze w grze
+            std::cout << "Gracz [" << i + 1 << "]: " << gracze[i]->get_nazwa() ;
+            gracze[i]->wyswietlReke();
         }
 }
 
 int Kasyno::ile_graczy_pozostalo() {
     int ile = 0;
     for (int i = 0; i < iloscWszystkichGraczy; i++)
-        if (this->gracze[i].get_graDalej()) // sprawdza czy gracz gra dalej
+        if (this->gracze[i]->get_graDalej()) // sprawdza czy gracz gra dalej
             ile++;
     return ile;
 }
 
 // w sumie dosc obrzydliwa ta funckja
 void Kasyno::okresl_zwyciezce() {
-    bool czyWygraliWszyscy = false;
     int maxWartoscReki = 0;
     int iloscGraczyz21Pkt = 0, iloscGraczyzWiecej21Pk = 0; 
     int i;
 
     std::cout << "|| Koniec rundy - zwycięzcy: ||" << std::endl;
     for (i = 0; i < iloscWszystkichGraczy; i++) {
-        if (this->gracze[i].get_wartoscReki() == WYGRYWAJACEPKT)
+        if (this->gracze[i]->get_wartoscReki() == WYGRYWAJACEPKT)
            iloscGraczyz21Pkt++;
         else
             iloscGraczyzWiecej21Pk++;
@@ -192,11 +189,11 @@ void Kasyno::okresl_zwyciezce() {
         std::cout << "||* Brak zwyciezcow - wszyscy pozostali gracze wiecej niz 21 Pkt *||" << std::endl;
     else {
         for (i = 0; i < iloscWszystkichGraczy; i++)   // ustalenie max liczby punktów
-            if (this->gracze[i].get_wartoscReki() > maxWartoscReki && this->gracze[i].get_wartoscReki() <= WYGRYWAJACEPKT)
-                maxWartoscReki = this->gracze[i].get_wartoscReki();        
+            if (this->gracze[i]->get_wartoscReki() > maxWartoscReki && this->gracze[i]->get_wartoscReki() <= WYGRYWAJACEPKT)
+                maxWartoscReki = this->gracze[i]->get_wartoscReki();        
         for (i = 0; i < iloscWszystkichGraczy; i++)    // pokazanie którzy gracze wygrali
-            if (this->gracze[i].get_wartoscReki() == maxWartoscReki)
-                std::cout << "||* zwyciezył - " << this->gracze[i].get_nazwa() << " *||" << std::endl;  // zwycięzca
+            if (this->gracze[i]->get_wartoscReki() == maxWartoscReki)
+                std::cout << "||* zwyciezył - " << this->gracze[i]->get_nazwa() << " *||" << std::endl;  // zwycięzca
     }
 }
 
@@ -207,37 +204,55 @@ void Kasyno::zapisz_stan_gry_txt() {
     std::ofstream fp;
     fp.open("Zapis.txt", std::ifstream::out); // otwarcie pliku w trybie zapisywania output -> do pliku
     // operacje
-    fp << "Stan gry (1): " << std::endl;
+    fp << "Stan Rundy (" << numerRundy << "): " << std::endl;
     for (i = 0; i < iloscWszystkichGraczy; i++){    // wyswietla stan Ręki każdego gracza
-        fp << "gracz [" << i + 1 << "]:" << std::endl;
+    /*
         std::cout.width(20);
-        fp << gracze[i].get_nazwa();    // nazwa gracza
-        //for(j = 0; i < gracze[i].get_iloscPosiadanychKart(); j++)
-        //    fp << gracze[i].get_Karta(j)->getFigura() << " " << gracze[i].get_Karta(j)->getKolor() << "|";
+        fp << "gracz [" << i + 1 << "]: " << gracze[i]->get_nazwa();
+        //for(j = 0; i < gracze[i]->get_iloscPosiadanychKart(); j++)
+        //    fp << gracze[i]->get_Karta(j)->getFigura() << " " << gracze[i]->get_Karta(j)->getKolor() << "|";
         std::cout.width(15);
         fp << "";
-        fp << gracze[i].get_wartoscReki() ;
+        fp << gracze[i]->get_wartoscReki() ;
         std::cout.width(15);
-        fp << gracze[i].get_iloscPosiadanychKart() << " ";
+        fp << gracze[i]->get_iloscPosiadanychKart() << " ";
         fp << std::endl;
+    */
+        fp << **gracze;
     }
+    fp << std::endl;
     fp.close(); // opcjonalnie destruktor ofstream też zamknie plik
     numerRundy++;
+}
+
+std::ofstream& operator<<(std::ofstream& of, Karta& ka) {
+    of << ka.getFigura() << ka.getKolor();
+    return of;
+}
+
+std::ofstream& operator<<(std::ofstream& of, Gracz& gr) {
+    of << gr.get_nazwa() << gr.get_wartoscReki() << gr.get_iloscPosiadanychKart();     
+    return of;
 }
 
 void Kasyno::inicjalizacja_graczy() {
     int i;
     char _nazwa[MAXNAZWAGRACZA];
-    std::string _nazwaWirtualnego = "Bot ";
     std::cout << "|| Ilosc Graczy ||"  << std::endl;
     wybor_ilosci_graczy(iloscGraczy);       // ustaw ilosc graczy
-
-
     std::cout << "|| Ilosc Graczy Wirtualnych ||"  << std::endl;
     wybor_ilosci_graczy(iloscBotow);        // ustaw ilosc graczy wirtualnych
-
     iloscWszystkichGraczy = iloscGraczy + iloscBotow;
-    gracze = new Gracz[iloscWszystkichGraczy];
+
+    gracze = new Gracz* [iloscWszystkichGraczy];    // alokujemy sb tablicę wskaźników
+    for(i = 0; i < iloscGraczy; i++)
+        gracze[i] = new Gracz;
+    for(i = 0; i < iloscBotow; i++)
+        gracze[i + iloscGraczy] = new Bot;
+
+
+    for(i = 0; i < iloscWszystkichGraczy; i++)    // przypisanie graczom kasyna
+        gracze[i]->set_mojeKasyno(this);
 
     std::cout << "Wybierz nazwy dla graczy: " << std::endl;    // nazwy dla graczy
     for (i = 0; i < iloscGraczy; i++ ) {
@@ -248,14 +263,14 @@ void Kasyno::inicjalizacja_graczy() {
             std::cin.clear();                                                  
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
         }
-        gracze[i].set_nazwa(_nazwa);
+        gracze[i]->set_nazwa(_nazwa);
     }
-    /*
+
     for (i = 0; i < iloscBotow; i++){ // ustaw nazwy botow
-        _nazwaWirtualnego.replace(4, 1, std::to_string(i) ) ;
-        gracze[iloscGraczy - 1 + i].set_nazwa( _nazwaWirtualnego);
+        strcpy(_nazwa, "Bot  ");
+        _nazwa[3] = i + '1';
+        gracze[i + iloscGraczy]->set_nazwa(_nazwa);
     }
-    */
 }
 
 void wybor_ilosci_graczy(int& _ilosc) {
@@ -270,6 +285,42 @@ void wybor_ilosci_graczy(int& _ilosc) {
     } while ( !(_ilosc >= 1 && _ilosc <= MAXGRACZY) );    
 }
 
-void Kasyno::rozpocznij_nowa_gre() {
+void Kasyno::zwalnianie_pamieci() {
+    int i;
+    for(i = 0; i < iloscGraczy; i++)
+        delete gracze[i];
+    for(i = 0; i < iloscBotow; i++)
+        delete gracze[i + iloscGraczy];
+    delete[] gracze;
+}
 
+bool Kasyno::rozpocznij_nowa_gre() {
+    int wybor = 0;
+    bool powtorz = true, restart = false;
+    std::cout << "Koniec rundy:\n (1) Graj dalej\n (2) Oposc kasyno\nWybierz (1) / (2)\n";
+    while (powtorz){
+        std::cin >> wybor;
+        if (std::cin.fail() == true){
+            std::cout << "Wykryto wprowadzenie błednych danych" << std::endl;
+            std::cin.clear();                                                  
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+        }
+        else {
+            powtorz = false;
+        }
+    }
+    switch (wybor)
+    {
+    case 1:
+        restart = true;
+        break;
+    case 2:
+        restart = false;
+        break;
+    default:
+        std::cout <<  " nastapil blad menu";
+        break;
+    }
+    system("clear"); // system("cls"); // for windows
+    return restart;
 }

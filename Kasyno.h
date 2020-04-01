@@ -17,7 +17,7 @@ class Kasyno
 {
     private:
         Karta talia[ILOSCKART];
-        Gracz* gracze;
+        Gracz** gracze;
         int iloscGraczy = MAXGRACZY; 
         int iloscBotow = MAXBOTOW;
         int iloscWszystkichGraczy;
@@ -31,15 +31,13 @@ class Kasyno
         void decyzja_o_Passowaniu();
         void rozdaj_karty_grajacym(int _ile);
         void wyswietl_reke_grajacych();
+        void inicjalizacja_graczy();   
         int ile_graczy_pozostalo();
         void okresl_zwyciezce();
-        
         // do dokonczenia
         void zapisz_stan_gry_txt(); 
-
-        // do napisania 2
-        void inicjalizacja_graczy();        
-        void rozpocznij_nowa_gre(); // możliwość rozpoczęcia nowej gry przez kasyno
+        void zwalnianie_pamieci();     
+        bool rozpocznij_nowa_gre(); // możliwość rozpoczęcia nowej gry przez kasyno
         // do napisania 3
         void dodaj_bota();
 };
