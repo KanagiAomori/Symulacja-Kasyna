@@ -38,8 +38,10 @@ class Kasyno
         void zapisz_stan_gry_txt(); 
         void zwalnianie_pamieci();     
         bool rozpocznij_nowa_gre(); // możliwość rozpoczęcia nowej gry przez kasyno
-        // do napisania 3
-        void dodaj_bota();
+
+        friend std::ostream& operator<<(std::ostream& os, const Karta& ka);
+        friend std::ostream& operator<<(std::ostream& os, Gracz& gr);
+
 };
 
 void swapCard(Karta& A, Karta& B);

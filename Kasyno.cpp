@@ -218,21 +218,21 @@ void Kasyno::zapisz_stan_gry_txt() {
         fp << gracze[i]->get_iloscPosiadanychKart() << " ";
         fp << std::endl;
     */
-        fp << **gracze;
+        fp << *this->gracze[i];
     }
     fp << std::endl;
     fp.close(); // opcjonalnie destruktor ofstream też zamknie plik
     numerRundy++;
 }
 
-std::ofstream& operator<<(std::ofstream& of, Karta& ka) {
-    of << ka.getFigura() << ka.getKolor();
-    return of;
+std::ostream& operator<<(std::ostream& os, Karta& ka) {
+    os << ka.getFigura() << ka.getKolor();
+    return os;
 }
 
-std::ofstream& operator<<(std::ofstream& of, Gracz& gr) {
-    of << gr.get_nazwa() << gr.get_wartoscReki() << gr.get_iloscPosiadanychKart();     
-    return of;
+std::ostream& operator<<(std::ostream& os, Gracz& gr) {
+    os << gr.get_nazwa() << gr.get_wartoscReki() << gr.get_iloscPosiadanychKart();     
+    return os;
 }
 
 void Kasyno::inicjalizacja_graczy() {
