@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <ostream>
 
-// konstruktor kasyna tworzy talie kart oraz graczy
-Kasyno::Kasyno() {
+
+Kasyno::Kasyno() {  // konstruktor kasyna tworzy talie kart oraz graczy
     int n = 0;
     int i;
     for (i = 0; i < ILOSCKOLOROW; i++){ // tworzenie tali
@@ -33,7 +33,7 @@ void Kasyno::tasuj() {
         swapCard(talia[Karta1], talia[Karta2]);
     }
 }
-//sprawdzone
+
 void Kasyno::pokazTale() {
     for(int i = 0; i < ILOSCKART; i++){
        this->talia[i].wypisz();
@@ -47,7 +47,7 @@ void swapCard(Karta& A, Karta& B) {
     A = B;
     B = temp;
 }
-// sprawdzone
+
 Karta* Kasyno::dajKarte() {  // tak żeby nie wydać 2 razy tej samej karty
     Karta* doWydania = nullptr;
     bool losujDalej = true;
@@ -64,7 +64,7 @@ Karta* Kasyno::dajKarte() {  // tak żeby nie wydać 2 razy tej samej karty
     doWydania->setJestwBanku(false);
     return doWydania;
 }
-// sprawdzone
+
 void Kasyno::graj() {
     bool restart;
     static int nrRundy = 0;
@@ -72,7 +72,7 @@ void Kasyno::graj() {
 
     do {
     nrRundy++;
-
+    this->tasuj();  // tasu przed każdą rundą
     this->inicjalizacja_graczy();   // ustawienie ilosci graczy i ich nazw oraz ilosci graczy wirtualnych
         
     this->rozdaj_karty_grajacym(ileRozdac); // rozdanie 2 kart graczą
@@ -91,12 +91,11 @@ void Kasyno::graj() {
     this->zapisz_stan_gry_txt();
 
     this->zwalnianie_pamieci();
+    this->oddaj_karty_do_banku();
     std::cout << "Koniec Rundy " << "(" <<  nrRundy << ")" << std::endl;
     restart = this->rozpocznij_nowa_gre();    // menu wyboru
     } while (restart);
 }
-
-
 
 void Kasyno::decyzja_o_Passowaniu() {
     char decyzja;
@@ -137,11 +136,6 @@ void Kasyno::decyzja_o_Passowaniu() {
         }
         powtorz = true;
     }
-    /*
-    Bot* grPtr = nullptr;
-        grPtr = &gracze[i];
-        grPtr->set_graDalej();  
-    */
     for(i = iloscGraczy; i < iloscWszystkichGraczy; i++) {    // sprawdza czy boty przekroczyły limit
         gracze[i]->set_graDalej(false);
     }
@@ -197,7 +191,6 @@ void Kasyno::okresl_zwyciezce() {
     }
 }
 
-// do zajecia sie
 void Kasyno::zapisz_stan_gry_txt() {
     static int numerRundy = 1;
     int i, j;
@@ -205,19 +198,15 @@ void Kasyno::zapisz_stan_gry_txt() {
     fp.open("Zapis.txt", std::ifstream::out); // otwarcie pliku w trybie zapisywania output -> do pliku
     // operacje
     fp << "Stan Rundy (" << numerRundy << "): " << std::endl;
+    fp.setf(std::ios::left);
+    fp.width(22);    
+    fp << "||Nazwa gracza ";
+    fp.width(strlen("|| Wartosc Kart "));
+    fp << "||Wartosc Kart ";
+    fp.width(strlen("|| Ilosc kart "));
+    fp << "||Ilosc kart ";
+    fp << "||Karty gracza " << std::endl;
     for (i = 0; i < iloscWszystkichGraczy; i++){    // wyswietla stan Ręki każdego gracza
-    /*
-        std::cout.width(20);
-        fp << "gracz [" << i + 1 << "]: " << gracze[i]->get_nazwa();
-        //for(j = 0; i < gracze[i]->get_iloscPosiadanychKart(); j++)
-        //    fp << gracze[i]->get_Karta(j)->getFigura() << " " << gracze[i]->get_Karta(j)->getKolor() << "|";
-        std::cout.width(15);
-        fp << "";
-        fp << gracze[i]->get_wartoscReki() ;
-        std::cout.width(15);
-        fp << gracze[i]->get_iloscPosiadanychKart() << " ";
-        fp << std::endl;
-    */
         fp << *this->gracze[i];
     }
     fp << std::endl;
@@ -225,31 +214,45 @@ void Kasyno::zapisz_stan_gry_txt() {
     numerRundy++;
 }
 
-std::ostream& operator<<(std::ostream& os, Karta& ka) {
-    os << ka.getFigura() << ka.getKolor();
+std::ostream& operator<<(std::ostream& os, Karta& ka) { // przeciążone operatory iostream 
+    os <<  ka.getFigura() << " " << ka.getKolor() << ", ";
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, Gracz& gr) {
-    os << gr.get_nazwa() << gr.get_wartoscReki() << gr.get_iloscPosiadanychKart();     
+    os.width(2);
+    os << "||";
+    os.setf(std::ios::left);
+    os.width (20);
+    os << gr.get_nazwa();
+    os.width(2);
+    os << "||";
+    os.width(strlen("||Wartosc Kart"));
+    os << gr.get_wartoscReki();
+    os.width(2);
+    os << "||";
+    os.width(strlen("||Ilosc kart"));
+    os << gr.get_iloscPosiadanychKart();
+    os.width(2);
+    os << "||";    
+    for (int i = 0; i < gr.get_iloscPosiadanychKart(); i++) {
+        os << *gr.get_Karta(i);
+    }
+    os << std::endl; 
     return os;
 }
 
 void Kasyno::inicjalizacja_graczy() {
     int i;
     char _nazwa[MAXNAZWAGRACZA];
+
     std::cout << "|| Ilosc Graczy ||"  << std::endl;
     wybor_ilosci_graczy(iloscGraczy);       // ustaw ilosc graczy
     std::cout << "|| Ilosc Graczy Wirtualnych ||"  << std::endl;
     wybor_ilosci_graczy(iloscBotow);        // ustaw ilosc graczy wirtualnych
+
     iloscWszystkichGraczy = iloscGraczy + iloscBotow;
-
-    gracze = new Gracz* [iloscWszystkichGraczy];    // alokujemy sb tablicę wskaźników
-    for(i = 0; i < iloscGraczy; i++)
-        gracze[i] = new Gracz;
-    for(i = 0; i < iloscBotow; i++)
-        gracze[i + iloscGraczy] = new Bot;
-
+    this->alokacja_graczy();
 
     for(i = 0; i < iloscWszystkichGraczy; i++)    // przypisanie graczom kasyna
         gracze[i]->set_mojeKasyno(this);
@@ -280,10 +283,20 @@ void wybor_ilosci_graczy(int& _ilosc) {
         if (std::cin.fail() == true){
             std::cout << "Wykryto wprowadzenie błednych danych" << std::endl;
             std::cin.clear();                                                  
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+            std::cin.ignore(100 , '\n'); 
         }
     } while ( !(_ilosc >= 1 && _ilosc <= MAXGRACZY) );    
 }
+
+void Kasyno::alokacja_graczy() {
+    int i;
+    gracze = new Gracz* [iloscWszystkichGraczy];    // alokujemy sb tablicę wskaźników
+    for(i = 0; i < iloscGraczy; i++)
+        gracze[i] = new Gracz;
+    for(i = 0; i < iloscBotow; i++)
+        gracze[i + iloscGraczy] = new Bot;
+}
+
 
 void Kasyno::zwalnianie_pamieci() {
     int i;
@@ -323,4 +336,9 @@ bool Kasyno::rozpocznij_nowa_gre() {
     }
     system("clear"); // system("cls"); // for windows
     return restart;
+}
+
+void Kasyno::oddaj_karty_do_banku() {
+    for(int i = 0; i < ILOSCKART; i++)
+        talia[i].setJestwBanku(true);
 }

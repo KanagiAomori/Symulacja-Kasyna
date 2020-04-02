@@ -1,4 +1,3 @@
-//#pragma once
 #include <iostream>
 
 #ifndef KARTA
@@ -24,6 +23,8 @@ public:
     int getWartosc() const { return wartosc; }
     bool getjestwBanku() const { return jestwBanku; }
     void wypisz() const { std::cout << figura << " " << kolor << " "; }
+
+    friend std::ostream& operator<<(std::ostream& os, const Karta& ka);
 };
 
 #endif

@@ -7,7 +7,7 @@ Gracz::Gracz(){
 Gracz::~Gracz(){
     std::cout << "destruktor obiektu - Gracz" << std::endl;
 }
-// sprawdzone
+
 void Gracz::wezKarte(Karta* _karta){
     if (iloscPosiadanychKart < MAXKARTGRACZA){  // [ograniczenie] gracz może posiadać max 10 kart 
         kartyNaRece.push_back(_karta);  // dodaj karte na renke <vector>
@@ -18,14 +18,14 @@ void Gracz::wezKarte(Karta* _karta){
         std::cout << "Gracz: " << nazwa <<" ma maxymalna przysługująca mu ilość kart: " << MAXKARTGRACZA << std::endl;
     }
 }
-// sprawdzone
+
 void Gracz::set_WartoscReki(){
     wartoscReki = 0;
     for (Karta *karta : kartyNaRece){   // iteruj vector elementów *karata
         wartoscReki += karta->getWartosc();
     }
 }
-// sprawdzone
+
 void Gracz::wyswietlReke(){
     std::cout << "|| karty: ";
     for (int i = 0; i < kartyNaRece.size(); i++) // karty i kolory

@@ -7,7 +7,7 @@
 #include <vector>
 
 #define ILOSCKART 52
-#define MAXGRACZY 3   // max graczy
+#define MAXGRACZY 3
 #define MAXBOTOW 3
 #define MAXWSZYSTKICHGRACZY MAXBOTOW + MAXGRACZY
 #define WYGRYWAJACEPKT 21
@@ -34,17 +34,16 @@ class Kasyno
         void inicjalizacja_graczy();   
         int ile_graczy_pozostalo();
         void okresl_zwyciezce();
-        // do dokonczenia
-        void zapisz_stan_gry_txt(); 
+        void zapisz_stan_gry_txt();
+        void alokacja_graczy(); 
         void zwalnianie_pamieci();     
         bool rozpocznij_nowa_gre(); // możliwość rozpoczęcia nowej gry przez kasyno
-
-        friend std::ostream& operator<<(std::ostream& os, const Karta& ka);
-        friend std::ostream& operator<<(std::ostream& os, Gracz& gr);
+        void oddaj_karty_do_banku();
 
 };
 
 void swapCard(Karta& A, Karta& B);
 void wybor_ilosci_graczy(int& _ilosc);
+
 
 #endif

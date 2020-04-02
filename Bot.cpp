@@ -1,26 +1,16 @@
 #include "Bot.h"
 
-std::string Bot::get_odwaga() {
+std::string Bot::get_odwaga() { // pobrania odwagi
     if (odwaga == zachowawczy)
         return "zachowawczy";
     else if (odwaga == normalny)
         return "normalny";
-    else if (odwaga == ryzykujacy)
+    else    // ryzykujący
         return "ryzykujacy";
 }
 
-/*
-void Bot::set_nazwa(int numer) {
-    char nazwaBota[5];
-    strcpy(nazwaBota,"Bot ");
-    nazwaBota[3] = std::__int_to_char(numer);
-    this->Gracz::set_nazwa(nazwaBota); // 5 znakow z /0;
-
-}
-*/
-
-void Bot::set_graDalej() {
-        if (odwaga == zachowawczy)
+void Bot::set_graDalej(bool _graDalej) {
+    if (odwaga == zachowawczy)
         if (this->get_wartoscReki() > LIMITZACHOWAWCZY)
             this->Gracz::set_graDalej(false);
     else if (odwaga == normalny)

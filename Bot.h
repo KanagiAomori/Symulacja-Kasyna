@@ -16,7 +16,7 @@ class Bot : public Gracz    // klasa Bot dziedziczy po klasie Gracz
         void set_odwaga(ryzyko _odwaga) { odwaga = _odwaga; };
         void set_nazwa(int numer);
         std::string get_odwaga();
-        virtual void set_graDalej() override;
+        void set_graDalej(bool _graDalej) ;
 };
 
 #endif
