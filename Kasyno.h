@@ -1,6 +1,12 @@
 #ifndef KASYNO
 #define KASYNO
 
+#ifdef _WIN32   // dodanie thread w przyjaznej dla windowsowców wersji
+#include <Windows.h>
+#else
+#include <unistd.h> // przyjazne dla linuxiarzy 
+#endif
+
 #include "Karta.h"
 #include "Gracz.h"
 #include "Bot.h"
@@ -27,19 +33,22 @@ class Kasyno
         void tasuj(); // zamienia parę kart 100 razy
         void pokazTale();
         Karta* dajKarte(); // tak żeby kasyno nie wydało 2 razy tej samej karty
-        void graj(); // rozdaje graczą po 2 karty i każe im pokazać rękę
+        virtual void graj(); //*// // rozdaje graczą po 2 karty i każe im pokazać rękę
         void decyzja_o_Passowaniu();
         void rozdaj_karty_grajacym(int _ile);
         void wyswietl_reke_grajacych();
-        void inicjalizacja_graczy();   
+        virtual void inicjalizacja_graczy(); //*//
+        virtual void wybor_odwagi();   
         int ile_graczy_pozostalo();
-        void okresl_zwyciezce();
-        void zapisz_stan_gry_txt();
+        virtual void okresl_zwyciezce();
+        virtual void zapisz_stan_gry_txt();
+        void wybor_ilosci_graczy(int& _ilosc);
         void alokacja_graczy(); 
         void zwalnianie_pamieci();     
         bool rozpocznij_nowa_gre(); // możliwość rozpoczęcia nowej gry przez kasyno
         void oddaj_karty_do_banku();
 
+        friend class SymulacjaKasyna;
 };
 
 void swapCard(Karta& A, Karta& B);

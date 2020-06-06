@@ -10,7 +10,7 @@ Gracz::~Gracz(){
 
 void Gracz::wezKarte(Karta* _karta){
     if (iloscPosiadanychKart < MAXKARTGRACZA){  // [ograniczenie] gracz może posiadać max 10 kart 
-        kartyNaRece.push_back(_karta);  // dodaj karte na renke <vector>
+        kartyNaRece.push_back(_karta);  // dodaj karte na zzrenke <vector>
         iloscPosiadanychKart = kartyNaRece.size();  // aktualizuj ilosc kart na rence
         this->set_WartoscReki();    // ustaw wartosc renki
     }

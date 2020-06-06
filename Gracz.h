@@ -9,6 +9,7 @@
 #define MAXNAZWAGRACZA 20
 
 class Kasyno; // forward declaration - ważne
+enum ryzyko{ zachowawczy, normalny, ryzykujacy};
 
 class Gracz
 {
@@ -19,6 +20,7 @@ class Gracz
         bool graDalej = true;
         Kasyno* mojeKasyno = nullptr;
         std::vector <Karta*> kartyNaRece;
+        ryzyko odwaga;  // 3 poziomy odwagi - dobiera do określonego poziomu punktów 
     public:
         Gracz();
         ~Gracz();
@@ -28,6 +30,7 @@ class Gracz
         void set_mojeKasyno(Kasyno* _mojeKasyno) { mojeKasyno = _mojeKasyno; }
         virtual void set_graDalej(bool _graDalej) { graDalej = _graDalej; }
         void set_nazwa(char* _nazwa) { strcpy(nazwa, _nazwa); }
+        std::vector <Karta*> get_kartyNaRece() { return kartyNaRece; }
         int get_wartoscReki() { return wartoscReki; }
         Karta* get_Karta(int index) { return kartyNaRece[index]; }
         int get_iloscPosiadanychKart() { return iloscPosiadanychKart; }
@@ -35,8 +38,9 @@ class Gracz
         bool get_graDalej() { return graDalej; } // akcesor czy gracz spasował
         Kasyno* get_mojeKasyno() { return mojeKasyno; }
         char* get_nazwa() { return nazwa; }
-
-                
+        ryzyko get_odwaga() { return odwaga; }
+        virtual std::string get_odwaga_str() { return "limit to MAX PKT"; }
+        void set_odwaga(ryzyko _odwaga) { odwaga = _odwaga; }
         friend std::ostream& operator<<(std::ostream& os, Gracz& gr);
 };
 
